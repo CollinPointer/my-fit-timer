@@ -191,6 +191,7 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
         t.suspend();
         btnStart.setText("Start");
         textList.setText("");
+        display();
     }//GEN-LAST:event_btnResetActionPerformed
 
     public static void main(String args[]) {
