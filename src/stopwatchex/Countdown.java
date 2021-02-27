@@ -19,9 +19,9 @@ public class Countdown extends javax.swing.JFrame {
     /**
      * Creates new form Countdown
      */
-    private long hours = 0;
-    private long minutes = 0;
-    private long seconds = 0;
+    private int hours = 0;
+    private int minutes = 0;
+    private int seconds = 0;
     private boolean isStart;
     private long milliseconds = 0;
     
