@@ -1,110 +1,51 @@
-package stopwatchex;
+package spc.javajuniors.myfittimer;
 
-public class Countdown extends javax.swing.JFrame implements Runnable {
-
-    int hour = 0, min = 0, sec = 0, milli = 0, count = 0;
-    String mainDisplay = "", milliDisplay = "", timeDisplay = "";
+public class TimerApplication extends javax.swing.JFrame implements Runnable {
     
+    Timer timer = new Timer();
     Thread t;
     
     // creates a new thread and resets timer displays
-    public Countdown() {
+    public TimerApplication() {
         initComponents();
         t = new Thread(this);
-        reset();
+        timer.reset();
     }
     
-    // clears the timer displays to 0
-    public void clear() {
-        hour = 0; min = 0; sec = 0; milli = 0;
-        mainDisplay = "00:00:00";
-        milliDisplay = "000";
-        
-        display();
-    }
-    
-    // resets the timer displays to 0 and clears the list
-    public void reset() {
-        hour = 0; min = 0; sec = 0; milli = 0;
-        mainDisplay = "00:00:00";
-        milliDisplay = "000";
-        timeDisplay = "";
-        
-        display();
-    }
-    
-    // displays the time
+    // displays the timer displays on the frame
     public void display() {
-        lbMainTime.setText(mainDisplay);
-        lbSecondaryTime.setText(milliDisplay);
-    }
-
-    // sets the main timer display (Hours, Minutes, Seconds)
-    public void setMainTimer() {
-        mainDisplay = "";
-        
-        // formats the hours
-        if (hour < 10) {
-            mainDisplay = "0" + hour;
-        } else {
-            mainDisplay = "" + hour;
-        }
-        
-        // formats the minutes
-        if (min < 10) {
-            mainDisplay += ":0" + min;
-        } else {
-            mainDisplay += ":" + min;
-        }
-        
-        // formats the seconds
-        if (sec < 10) {
-            mainDisplay += ":0" + sec;
-        } else {
-            mainDisplay += ":" + sec;
-        }
-    }
-    
-    // sets the secondary timer display (Milliseconds)
-    public void setSecondaryTimer() {
-        milliDisplay = "";
-        
-        if (milli < 10) {
-            milliDisplay = "00" + milli;
-        } else if (milli >= 10 && milli < 100) {
-            milliDisplay = "0" + milli;
-        } else {
-            milliDisplay = "" + milli;
-        }
+        lbMainTime.setText(timer.getMainDisplay());
+        lbSecondaryTime.setText(timer.getMilliDisplay());
     }
     
     public void run() {
+        
         try {
             while(true) {
-                milli++;
+                timer.setMilli(timer.getMilli() + 1);
                 
-                if (milli > 999) {
-                    milli = 0;
-                    sec++;
+                if (timer.getMilli() > 999) {
+                    timer.setMilli(0);
+                    timer.setSec(timer.getSec() + 1);
                 }
                 
-                if (sec > 59) {
-                    sec = 0;
-                    min++;
+                if (timer.getSec() > 59) {
+                    timer.setSec(0);
+                    timer.setMin(timer.getMin() + 1);
                 }
                 
-                if (min > 59) {
-                    min = 0;
-                    hour++;
+                if (timer.getMin() > 59) {
+                    timer.setMin(0);
+                    timer.setHour(timer.getHour() + 1);
                 }
                 
-                if (hour > 99) {
-                    min = 0;
-                    hour++;
+                if (timer.getHour() > 99) {
+                    timer.setMin(0);
+                    timer.setHour(timer.getHour() + 1);
                 }
                 
-                setMainTimer();
-                setSecondaryTimer();
+                timer.setMainTimer();
+                timer.setSecondaryTimer();
                 display();
                 Thread.sleep(1);
             }
@@ -114,10 +55,10 @@ public class Countdown extends javax.swing.JFrame implements Runnable {
     
     // prints the elapsed time in the textList area
     public void printTime() {
-        timeDisplay += lbMainTime.getText() + " "
-                + lbSecondaryTime.getText() + "\n";   
+        timer.setTimeDisplay(timer.getTimeDisplay() + lbMainTime.getText() + " "
+                + lbSecondaryTime.getText() + "\n");   
         
-        textList.setText(timeDisplay);
+        textList.setText(timer.getTimeDisplay());
     }
     
     @SuppressWarnings("unchecked")
@@ -221,8 +162,10 @@ public class Countdown extends javax.swing.JFrame implements Runnable {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    int count = 0;
+    
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-
+        
         if (btnStart.getText().equals("Start")) {
             btnStart.setText("Stop");
             count++;
@@ -237,26 +180,24 @@ public class Countdown extends javax.swing.JFrame implements Runnable {
             btnStart.setText("Start");
             t.suspend();
             printTime();
-            clear();
+            timer.clear();
         }
     }//GEN-LAST:event_btnStartActionPerformed
 
     private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
 
-        reset();
+        timer.reset();
         t.suspend();
         btnStart.setText("Start");
         textList.setText("");
     }//GEN-LAST:event_btnResetActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String args[]) {
         
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
-                new Countdown().setVisible(true);
+                new TimerApplication().setVisible(true);
             }
         });
     }
