@@ -1,15 +1,38 @@
 package spc.javajuniors.myfittimer;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 public class TimerApplication extends javax.swing.JFrame implements Runnable {
     
     Timer timer = new Timer();
     Thread t;
     
+    Connection conn = null;
+    Statement stmt = null;
+   
     // creates a new thread and resets timer displays
     public TimerApplication() {
         initComponents();
         t = new Thread(this);
+        connectDb();
         timer.reset();
+    }
+    
+    // connects to a database
+    public void connectDb() {
+        try {
+            // registers JDBC driver
+            Class.forName("com.mysql.jdbc.Driver");
+
+            // opens a connection
+            System.out.println("Connecting to a selected database...");
+            conn = DriverManager.getConnection(JDBCConnection.DB_URL, 
+                    JDBCConnection.USER, JDBCConnection.PASS);
+            System.out.println("Connected database successfully...");
+            } catch (Exception e){}
     }
     
     // displays the timer displays on the frame
@@ -129,7 +152,7 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
                     .addGroup(JPanel1Layout.createSequentialGroup()
                         .addGap(209, 209, 209)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(126, Short.MAX_VALUE))
+                .addContainerGap(134, Short.MAX_VALUE))
         );
         JPanel1Layout.setVerticalGroup(
             JPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -155,15 +178,14 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(JPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(JPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     int count = 0;
+    int id = 1;
     
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         
@@ -180,6 +202,24 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
         } else {
             btnStart.setText("Start");
             t.suspend();
+
+            // final time once user presses stop 
+            String time = lbMainTime.getText() + " " + lbSecondaryTime.getText();
+
+            try {
+                // executes query
+                System.out.println("Inserting record into the table...");
+                stmt = conn.createStatement();
+                String sql = "INSERT INTO timesdb.Times " + 
+                        "VALUES (" + id + ", " + "'" + time + "'" + ")";
+                stmt.executeUpdate(sql);  
+                System.out.println("Successfully inserted record into the table...");
+                id++;
+            } catch(SQLException se) {
+                // handle errors for JDBC
+                se.printStackTrace();
+            }
+
             printTime();
             timer.clear();
         }

@@ -9,7 +9,7 @@ public class Timer {
 
     }
     
-    // Getters & Setters
+    // getters & setters
     public int getHour() {
         return hour;
     }
