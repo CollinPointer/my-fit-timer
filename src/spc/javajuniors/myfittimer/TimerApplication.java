@@ -1,7 +1,5 @@
 package spc.javajuniors.myfittimer;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -10,35 +8,16 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
     Timer timer = new Timer();
     Thread t;
     
-    Connection conn = null;
+    JDBCConnection dbConnection;
     Statement stmt = null;
    
-    // creates a new thread and resets timer displays
+    // creates a new thread, connects to the database and resets timer displays
     public TimerApplication() {
         initComponents();
         t = new Thread(this);
-        connectDb();
+        dbConnection = new JDBCConnection();
+        dbConnection.connectDb();
         timer.reset();
-    }
-    
-    // connects to a database
-    public void connectDb() {
-        try {
-            // registers JDBC driver
-            Class.forName("com.mysql.jdbc.Driver");
-
-            // opens a connection
-            System.out.println("Connecting to a selected database...");
-            conn = DriverManager.getConnection(JDBCConnection.DB_URL, 
-                    JDBCConnection.USER, JDBCConnection.PASS);
-            System.out.println("Connected database successfully...");
-            } catch (Exception e){}
-    }
-    
-    // displays the timer displays on the frame
-    public void display() {
-        lbMainTime.setText(timer.getMainDisplay());
-        lbSecondaryTime.setText(timer.getMilliDisplay());
     }
     
     public void run() {
@@ -76,6 +55,12 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
         
     }
     
+    // displays the timer displays on the frame
+    public void display() {
+        lbMainTime.setText(timer.getMainDisplay());
+        lbSecondaryTime.setText(timer.getMilliDisplay());
+    }
+    
     // prints the elapsed time in the textList area
     public void printTime() {
         timer.setTimeDisplay(timer.getTimeDisplay() + lbMainTime.getText() + " "
@@ -95,6 +80,7 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
         btnReset = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         textList = new javax.swing.JTextArea();
+        btnClear = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("My Fit Timer");
@@ -133,6 +119,15 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
         textList.setTabSize(4);
         jScrollPane1.setViewportView(textList);
 
+        btnClear.setBackground(new java.awt.Color(255, 255, 255));
+        btnClear.setFont(new java.awt.Font("Optima", 0, 36)); // NOI18N
+        btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout JPanel1Layout = new javax.swing.GroupLayout(JPanel1);
         JPanel1.setLayout(JPanel1Layout);
         JPanel1Layout.setHorizontalGroup(
@@ -142,8 +137,8 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
                     .addGroup(JPanel1Layout.createSequentialGroup()
                         .addGap(157, 157, 157)
                         .addComponent(btnStart, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(59, 59, 59)
-                        .addComponent(btnReset, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(63, 63, 63)
+                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(JPanel1Layout.createSequentialGroup()
                         .addGap(118, 118, 118)
                         .addComponent(lbMainTime)
@@ -151,7 +146,10 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
                         .addComponent(lbSecondaryTime))
                     .addGroup(JPanel1Layout.createSequentialGroup()
                         .addGap(209, 209, 209)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(JPanel1Layout.createSequentialGroup()
+                        .addGap(252, 252, 252)
+                        .addComponent(btnReset, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(134, Short.MAX_VALUE))
         );
         JPanel1Layout.setVerticalGroup(
@@ -164,10 +162,12 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
                 .addGap(32, 32, 32)
                 .addGroup(JPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnStart, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnReset, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(36, 36, 36)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(78, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 316, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(36, 36, 36)
+                .addComponent(btnReset, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(80, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -178,7 +178,9 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(JPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(JPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
@@ -188,7 +190,6 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
     int id = 1;
     
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-        
         if (btnStart.getText().equals("Start")) {
             btnStart.setText("Stop");
             count++;
@@ -208,12 +209,12 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
 
             try {
                 // executes query
-                System.out.println("Inserting record into the table...");
-                stmt = conn.createStatement();
+                System.out.println("Inserting time into table...");
+                stmt = dbConnection.conn.createStatement();
                 String sql = "INSERT INTO timesdb.Times " + 
                         "VALUES (" + id + ", " + "'" + time + "'" + ")";
                 stmt.executeUpdate(sql);  
-                System.out.println("Successfully inserted record into the table...");
+                System.out.println("Successfully inserted time into table...");
                 id++;
             } catch(SQLException se) {
                 // handle errors for JDBC
@@ -224,18 +225,38 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
             timer.clear();
         }
     }//GEN-LAST:event_btnStartActionPerformed
-
+   
     private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
-
         timer.reset();
         t.suspend();
+        
+            try {
+                // executes query
+                System.out.println("Deleting times from table...");
+                stmt = dbConnection.conn.createStatement();
+                String sql = "TRUNCATE TABLE timesdb.Times;";
+                stmt.executeUpdate(sql);  
+                System.out.println("Successfully deleted times from table...");
+                id = 1;
+            } catch(SQLException se) {
+                // handle errors for JDBC
+                se.printStackTrace();
+            } 
+            
         btnStart.setText("Start");
         textList.setText("");
         display();
     }//GEN-LAST:event_btnResetActionPerformed
 
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        timer.reset();
+        t.suspend();
+        btnStart.setText("Start");
+        textList.setText("");
+        display();
+    }//GEN-LAST:event_btnClearActionPerformed
+
     public static void main(String args[]) {
-        
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -246,6 +267,7 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel JPanel1;
+    private javax.swing.JButton btnClear;
     private javax.swing.JButton btnReset;
     private javax.swing.JButton btnStart;
     private javax.swing.JScrollPane jScrollPane1;
