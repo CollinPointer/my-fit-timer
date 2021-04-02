@@ -51,8 +51,10 @@ public class TimerApplication extends javax.swing.JFrame implements Runnable {
                 display();
                 Thread.sleep(1);
             }
-        } catch(Exception e) {}
-        
+        } catch(Exception e) {
+            // handles errors
+            e.printStackTrace();
+        }
     }
     
     // displays the timer displays on the frame
